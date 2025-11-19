@@ -148,7 +148,7 @@ public class Dashboard extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 auth.signOut();
-                Toast.makeText(Dashboard.this, "signOut Succesfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Dashboard.this, "signOut Successfully", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(Dashboard.this, login.class);
                 startActivity(intent);
                 finish();
@@ -219,25 +219,39 @@ public class Dashboard extends AppCompatActivity {
 
         });
 
+
+
+
+
         //////////////////////////////////////fetch user detail/////////////////////////
 
         mUploads = new ArrayList<>();
         DatabaseReference mDatabaseRef = FirebaseDatabase.getInstance().getReference("emergency").child(ussd);
+
         mDatabaseRef.addValueEventListener(new ValueEventListener() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                mUploads.clear(); // Clear list before adding new data to prevent duplication
+
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    people people = postSnapshot.getValue(people.class);
-                    mUploads.add(people);
+                    people person = postSnapshot.getValue(people.class);
+                    if (person != null) { // Null check to avoid crashes
+                        mUploads.add(person);
+                    }
                 }
-                mAdapter = new ImageAdpter(Dashboard.this, mUploads);
-                mRecyclerView.setAdapter(mAdapter);
-                mAdapter.notifyDataSetChanged();
+
+                if (mAdapter == null) {  // Initialize adapter only once
+                    mAdapter = new ImageAdpter(Dashboard.this, mUploads);
+                    mRecyclerView.setAdapter(mAdapter);
+                } else {
+                    mAdapter.notifyDataSetChanged();
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("FirebaseError", "Database Error: " + error.getMessage());
             }
         });
         //////////////////////////////////show trusted people in list/////////////////////////
@@ -278,7 +292,7 @@ public class Dashboard extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.getWindow().getAttributes().windowAnimations = R.style.animation;
         okay_text = dialog.findViewById(R.id.okay_text);
-        new CountDownTimer(10000, 1000) {
+        new CountDownTimer(5000, 1000) {
             @SuppressLint("SetTextI18n")
             @Override
             public void onTick(long millisUntilFinished) {
@@ -308,39 +322,42 @@ public class Dashboard extends AppCompatActivity {
     ////////////////////////////////////////////alert Genrator
 
     private void fetchLocation() {
-        if (ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
             return;
         }
+
         Task<Location> task = fusedLocationProviderClient.getLastLocation();
         task.addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                if (location != null) {
-                    currentLocation = location;
-                    double lat = currentLocation.getLatitude();
-                    double log = currentLocation.getLongitude();
-
-                    Toast.makeText(getApplicationContext(), currentLocation.getLatitude() + "" + currentLocation.getLongitude(), Toast.LENGTH_SHORT).show();
-
-                   String  lat1 = Double.toString(lat);
-                    String log1 = Double.toString(log);
-
-                    if (lat1.isEmpty()&& log1.isEmpty()){
-                        Toast.makeText(Dashboard.this, "Enable GPS", Toast.LENGTH_SHORT).show();
-                    }else{
-                        sendsms(lat1,log1);
-                    }
-
-
+                if (location == null) {
+                    Toast.makeText(Dashboard.this, "Enable GPS", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                currentLocation = location;
+                double lat = currentLocation.getLatitude();
+                double lng = currentLocation.getLongitude();
+
+                String lat1 = Double.toString(lat);
+                String log1 = Double.toString(lng);
+
+                sendsms(lat1, log1);
             }
         });
     }
 
+    // Prevent duplicate messages
     private void sendsms(String lat1, String log1) {
+        if (ussd == null || ussd.isEmpty()) {
+            Log.e(TAG, "USSD code is null or empty, cannot fetch emergency contacts.");
+            return;
+        }
+
+        Log.d(TAG, "USSD Code: " + ussd); // Debugging log
 
         databaseReference = FirebaseDatabase.getInstance().getReference().child("emergency").child(ussd);
 
@@ -348,54 +365,57 @@ public class Dashboard extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                    // Assuming phone numbers are stored in a child named "phone"
                     String phoneNumber = userSnapshot.child("person_mobile").getValue(String.class);
-                    if (phoneNumber!=null && !processedNumbers.contains(phoneNumber)) {
 
+                    if (phoneNumber != null && !phoneNumber.isEmpty() && !processedNumbers.contains(phoneNumber)) {
+                        processedNumbers.add(phoneNumber);
 
-                        String sms = "hey im\n"+restaurant_name+"\n"+ssoss +
-                                "\n my Current location is\n"+" https://www.google.com/maps?q="+lat1+","+log1;
+                        String name = (restaurant_name != null) ? restaurant_name : "Unknown";
+                        String sos = (ssoss != null) ? ssoss : "emergency";
+
+                        String sms = "Hey I am: \n" +
+                                name + "\n" + sos +
+                                "\n\nMy Current location is:\n" +
+                                "https://www.google.com/maps?q=" + lat1 + "," + log1;
+
                         Log.d(TAG, "Processing phone number: " + phoneNumber);
+                        Log.d("SMS_DEBUG", "sendsms() called with lat: " + lat1 + ", log: " + log1);
 
-                        String ssm = "hi "+restaurant_name+"\n"+ssoss;
-                       /// String loc = "https://www.google.com/maps?q=21.31368681009876, 74.60366915692443";
-
-//                        Toast.makeText(Dashboard.this, ""+restaurant_name, Toast.LENGTH_SHORT).show();
-//                        Toast.makeText(Dashboard.this, ""+ssoss, Toast.LENGTH_SHORT).show();
-//                        Toast.makeText(Dashboard.this, ""+phoneNumber, Toast.LENGTH_SHORT).show();
-//                        Toast.makeText(Dashboard.this, ""+lat1+log1, Toast.LENGTH_SHORT).show();
-
-                        sendSMS1(phoneNumber,sms);
-
-                      //requestLocationUpdates();
+                        try {
+                            sendSMS1(phoneNumber, sms);
+                          //  Toast.makeText(Dashboard.this, "Location: " + lat1 + ", " + log1, Toast.LENGTH_LONG).show();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Failed to send SMS to " + phoneNumber + ": " + e.getMessage());
+                        }
                     }
                 }
-
             }
-
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e(TAG, "Error reading database", databaseError.toException());
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "Database error: " + error.getMessage());
+                Toast.makeText(Dashboard.this, "Failed to fetch emergency contacts. Please check your internet connection.", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
     private void sendSMS1(String phoneNumber, String sms) {
-        Toast.makeText(Dashboard.this, phoneNumber, Toast.LENGTH_SHORT).show();
-        Toast.makeText(Dashboard.this, sms, Toast.LENGTH_SHORT).show();
+        if (phoneNumber == null || phoneNumber.trim().isEmpty() || sms == null || sms.trim().isEmpty()) {
+            Toast.makeText(this, "Invalid phone number or message", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         try {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNumber, null, sms, null, null);
             Toast.makeText(this, "SMS sent successfully", Toast.LENGTH_SHORT).show();
+
+            processedNumbers.add(phoneNumber);
         } catch (Exception e) {
             Toast.makeText(this, "Failed to send SMS", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
+            Log.e("SMS_ERROR", "Error sending SMS: " + e.getMessage(), e);
         }
-
-        processedNumbers.add(phoneNumber);
     }
+
 
 }
 

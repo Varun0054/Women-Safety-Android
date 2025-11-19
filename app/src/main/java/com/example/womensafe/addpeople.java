@@ -19,15 +19,12 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -35,99 +32,83 @@ import com.google.firebase.storage.UploadTask;
 
 import java.util.Objects;
 
-
 public class addpeople extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
-
-    Spinner spinner1,spinner2,spinner3;
-    EditText editText1, editText2,editText3,editText4,editText5;
+    Spinner spinner1;
+    EditText editText1, editText2;
     Button button;
     ImageView imageView;
     private static final int PROFILE_REQUEST_CODE = 1;
-    String ussd="";
     Uri uri;
     DatabaseReference databaseReference;
-    String[] people = { "SELECT","PARENTS", "BROTHER",
-            "FRINDES", "NEABERS","POLICE",
-    };
+    String ussd = "";
 
-    private FirebaseFirestore db1;
-
+    private FirebaseFirestore db;
     FirebaseAuth auth;
-    FirebaseUser user;
-    FirebaseFirestore db;
-    DatabaseReference databaseReference1;
-
     StorageReference storageReference;
+
+    String[] people = {"SELECT", "PARENTS", "BROTHER", "FRIENDS", "NEIGHBORS", "POLICE"};
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_addpeople);
 
-        editText1 = findViewById(R.id.pname);
-        editText2 = findViewById(R.id.pmobile);
-
-
-        button = findViewById(R.id.button4);
-        imageView = findViewById(R.id.profile_image12);
+        // Initialize Firebase
+        auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-
-        auth=FirebaseAuth.getInstance();
-        ussd = auth.getUid();
-
-       spinner1 = findViewById(R.id.selecttype);
-        spinner1.setOnItemSelectedListener(addpeople.this);
-
-
-
         storageReference = FirebaseStorage.getInstance().getReference();
         databaseReference = FirebaseDatabase.getInstance().getReference().child("emergency");
 
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(intent, PROFILE_REQUEST_CODE);
-            }
+        // Initialize UI components
+        editText1 = findViewById(R.id.pname);
+        editText2 = findViewById(R.id.pmobile);
+        button = findViewById(R.id.button4);
+        imageView = findViewById(R.id.profile_image12);
+        spinner1 = findViewById(R.id.selecttype);
+        spinner1.setOnItemSelectedListener(addpeople.this);
+
+        // Check if user is logged in
+        if (auth.getCurrentUser() != null) {
+            ussd = auth.getUid();
+        } else {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        // Spinner setup
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, people);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner1.setAdapter(adapter);
+
+        // Image selection
+        imageView.setOnClickListener(v -> {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(intent, PROFILE_REQUEST_CODE);
         });
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (uri != null) {
-                    uplode();
-                } else {
-                    Toast.makeText(addpeople.this, "Select a Profile Picture first", Toast.LENGTH_SHORT).show();
-                }
+        // Upload button click
+        button.setOnClickListener(v -> {
+            if (uri != null) {
+                upload();
+            } else {
+                Toast.makeText(addpeople.this, "Select a Profile Picture first", Toast.LENGTH_SHORT).show();
             }
-
         });
-
-        ArrayAdapter a1 = new ArrayAdapter(this, android.R.layout.simple_spinner_item,
-                people);
-        a1.setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item);
-        spinner1.setAdapter(a1);
-
-
-
-    }/////////////////////////////////////////////
-
-
+    }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+        // Do nothing for now
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-
+        // Do nothing for now
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -139,44 +120,65 @@ public class addpeople extends AppCompatActivity implements AdapterView.OnItemSe
             Toast.makeText(this, "Profile selected", Toast.LENGTH_SHORT).show();
         }
     }
-    private void uplode() {
+
+    private void upload() {
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Creating Profile...");
         progressDialog.show();
 
-        StorageReference pdfStorageReference = storageReference.child("eme_people_profile").child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid()).child(System.currentTimeMillis() + ".jpeg");
+        // Input validation
+        if (editText1 == null || editText1.getText().toString().trim().isEmpty()) {
+            Toast.makeText(this, "Please enter a valid name", Toast.LENGTH_SHORT).show();
+            progressDialog.dismiss();
+            return;
+        }
 
-        pdfStorageReference.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                progressDialog.dismiss();
-                Toast.makeText(addpeople.this, "profile uploaded successfully", Toast.LENGTH_SHORT).show();
-                pdfStorageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        Bundle bundle = getIntent().getExtras();
+        if (editText2 == null || editText2.getText().toString().trim().isEmpty()) {
+            Toast.makeText(this, "Please enter a valid mobile number", Toast.LENGTH_SHORT).show();
+            progressDialog.dismiss();
+            return;
+        }
 
-                        String member_type = spinner1.getSelectedItem().toString();
-                        String person_name = editText1.getText().toString().trim();
-                        String person_mobile = editText2.getText().toString().trim();
+        if (spinner1 == null || spinner1.getSelectedItem() == null) {
+            Toast.makeText(this, "Please select a valid member type", Toast.LENGTH_SHORT).show();
+            progressDialog.dismiss();
+            return;
+        }
 
+        String person_name = editText1.getText().toString().trim();
+        String person_mobile = editText2.getText().toString().trim();
+        String member_type = spinner1.getSelectedItem().toString();
 
-                        CollectionReference dbCourses = db.collection("trusted_people");
+        if (member_type.equals("SELECT")) {
+            Toast.makeText(this, "Please select a valid member type", Toast.LENGTH_SHORT).show();
+            progressDialog.dismiss();
+            return;
+        }
 
-                        // Create a PDF object with name, description, and URL
-                        people people = new people(person_name, person_mobile,uri.toString(),member_type);
+        // Upload image to Firebase Storage
+        StorageReference profileRef = storageReference.child("eme_people_profile")
+                .child(Objects.requireNonNull(auth.getCurrentUser()).getUid())
+                .child(System.currentTimeMillis() + ".jpeg");
 
+        profileRef.putFile(uri)
+                .addOnSuccessListener(taskSnapshot -> profileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    // Store data in Firebase Realtime Database
+                    people person = new people(person_name, person_mobile, uri.toString(), member_type);
 
-                        databaseReference.child(ussd).child(person_name).setValue(people).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                Toast.makeText(addpeople.this, "Added Succesfully", Toast.LENGTH_SHORT).show();
-                                finish();
-                            }
-                        });
-                    }
+                    databaseReference.child(ussd).child(person_name).setValue(person)
+                            .addOnCompleteListener(task -> {
+                                progressDialog.dismiss();
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(addpeople.this, "Added Successfully", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                } else {
+                                    Toast.makeText(addpeople.this, "Failed to add. Try again!", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                }))
+                .addOnFailureListener(e -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(addpeople.this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
-            }
-        });
     }
 }
