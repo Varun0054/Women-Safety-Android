@@ -25,17 +25,25 @@ import java.util.Map;
 
 public class editmsg extends AppCompatActivity {
 
-    TextView t1,t2,t3,t4,t5;
+    TextView t1,t2,t3,t4;
     EditText editText;
     Button button;
     DatabaseReference db;
-    FirebaseAuth auth;
     String ussd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editmsg);
+
+        FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentFirebaseUser == null) {
+            Toast.makeText(editmsg.this, "You need to be logged in to edit messages.", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+        ussd = currentFirebaseUser.getUid();
+
         t1=findViewById(R.id.textView28);
         t2=findViewById(R.id.textView29);
         t3=findViewById(R.id.textView30);
@@ -44,15 +52,10 @@ public class editmsg extends AppCompatActivity {
         button = findViewById(R.id.button);
         db= FirebaseDatabase.getInstance().getReference("customemsg");
 
-        FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        ussd = currentFirebaseUser.getUid();
-
-
         t1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 editText.setText(t1.getText());
-
             }
         });
         t2.setOnClickListener(new View.OnClickListener() {
@@ -74,23 +77,19 @@ public class editmsg extends AppCompatActivity {
             }
         });
 
-
-
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String msg = editText.getText().toString();
+                String msg = editText.getText().toString().trim();
 
                 if (msg.isEmpty()){
-                    Toast.makeText(editmsg.this, "Please Insert Data", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(editmsg.this, "Please insert a message.", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     savemsg(msg);
                 }
-
             }
         });
-
     }
 
     private void savemsg(String msg) {
@@ -98,15 +97,23 @@ public class editmsg extends AppCompatActivity {
         String currentDateAndTime = sdf.format(new Date());
 
         Map<String,String > map = new HashMap<>();
-                    map.put("currenttime",currentDateAndTime.toString());
-                    map.put("massage",String.valueOf(msg));
+        map.put("currenttime",currentDateAndTime);
+        map.put("massage",msg);
 
-                    db.child(ussd).child("sos_msg").setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            Toast.makeText(editmsg.this, "Saved Succesfully", Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
-                   });
+        db.child(ussd).child("sos_msg").setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()) {
+                    Toast.makeText(editmsg.this, "Saved Successfully", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    String error = "Failed to save message.";
+                    if(task.getException() != null) {
+                        error = task.getException().getMessage();
+                    }
+                    Toast.makeText(editmsg.this, "Error: " + error, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 }

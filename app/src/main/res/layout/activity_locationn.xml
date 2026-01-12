@@ -1,7 +1,35 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/myMap"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".locationn" />
+    tools:context=".locationn">
+
+    <!-- Google Map Fragment -->
+    <fragment
+        android:id="@+id/myMap"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Refresh Location Button -->
+    <Button
+        android:id="@+id/btnRefresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Refresh Location"
+        android:backgroundTint="#9C27B0"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_margin="16dp" />
+
+    <!-- Map Type Switch Button -->
+    <Button
+        android:id="@+id/btnMapType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Map Type"
+        android:backgroundTint="#3F51B5"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp" />
+
+</FrameLayout>

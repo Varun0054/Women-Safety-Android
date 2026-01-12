@@ -65,12 +65,15 @@ public class register extends AppCompatActivity {
         auth.createUserWithEmailAndPassword(email1, pass1).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()){
-                        genratesuccess();
+                if (task.isSuccessful()) {
+                    genratesuccess();
+                } else {
+                    String errorMessage = "Authentication failed.";
+                    if (task.getException() != null) {
+                        errorMessage = task.getException().getMessage();
                     }
-                    else {
-                        Toast.makeText(register.this, "Failed , Try after Some time", Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(register.this, "Registration Failed: " + errorMessage, Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -81,7 +84,6 @@ public class register extends AppCompatActivity {
         dialog.setContentView(R.layout.success);
         dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         dialog.setCancelable(false);
-        dialog.getWindow().getAttributes().windowAnimations = R.style.animation;
         oky = dialog.findViewById(R.id.okay_text);
         new CountDownTimer(6000, 1000) {
             @SuppressLint("SetTextI18n")

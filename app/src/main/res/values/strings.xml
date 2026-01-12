@@ -1,6 +1,4 @@
 <resources>
     <string name="app_name">womensafe</string>
-    <string name="qr_code">qr_code</string>
-    <string name="enter_your_info">Enter your info</string>
-    <string name="generate_qr_code">Generate QR Code</string>
+    <string name="accessibility_service_description">This service is used to detect rapid Power Button presses to trigger an emergency SOS. It does not read screen content or collect any personal data.</string>
 </resources>
