@@ -12,13 +12,6 @@
         android:layout_height="wrap_content"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:title="Edit Profile"
-            app:titleTextColor="@android:color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -151,6 +144,7 @@
                 android:id="@+id/update_profile_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#E91E63"
                 android:layout_marginTop="24dp"
                 android:text="Update Profile" />
 

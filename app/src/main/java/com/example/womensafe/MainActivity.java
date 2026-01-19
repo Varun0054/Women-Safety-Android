@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.WindowManager;
@@ -18,6 +19,7 @@ import androidx.core.app.ActivityCompat;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_LOCATION_PERMISSION = 101;
+    private static final int REQUEST_CODE_NOTIFICATION_PERMISSION = 102;
     private boolean hasNavigated = false;
 
     @Override
@@ -39,6 +41,18 @@ public class MainActivity extends AppCompatActivity {
     private void checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_LOCATION_PERMISSION);
+        } else {
+            checkNotificationPermission();
+        }
+    }
+
+    private void checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQUEST_CODE_NOTIFICATION_PERMISSION);
+            } else {
+                checkLocationEnabled();
+            }
         } else {
             checkLocationEnabled();
         }
@@ -71,10 +85,17 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE_LOCATION_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                checkLocationEnabled();
+                checkNotificationPermission();
             } else {
                 Toast.makeText(this, "Location permission is required to use this app.", Toast.LENGTH_LONG).show();
                 finish();
+            }
+        } else if (requestCode == REQUEST_CODE_NOTIFICATION_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                checkLocationEnabled();
+            } else {
+                Toast.makeText(this, "Notification permission is important for SOS alerts to work correctly.", Toast.LENGTH_LONG).show();
+                checkLocationEnabled();
             }
         }
     }

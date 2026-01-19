@@ -47,7 +47,7 @@ public class addpeople extends AppCompatActivity implements AdapterView.OnItemSe
     FirebaseAuth auth;
     StorageReference storageReference;
 
-    String[] people = {"SELECT", "PARENTS", "BROTHER", "FRIENDS", "NEIGHBORS", "POLICE"};
+    String[] people = {"SELECT", "PARENTS", "SIBLING", "FRIEND", "NEIGHBOR", "POLICE", "FAMILY"};
 
     @SuppressLint("MissingInflatedId")
     @Override

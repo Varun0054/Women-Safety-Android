@@ -1,5 +1,6 @@
 package com.example.womensafe;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -13,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class SosDialogActivity extends AppCompatActivity {
 
     private CountDownTimer countDownTimer;
+    public static final String ACTION_SEND_SOS = "com.example.womensafe.ACTION_SEND_SOS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,11 +33,6 @@ public class SosDialogActivity extends AppCompatActivity {
             );
         }
 
-        // Make the activity a floating dialog
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
-        }
-
         final TextView countdownText = findViewById(R.id.countdown_text);
         View cancelButton = findViewById(R.id.cancel_button);
 
@@ -48,9 +45,9 @@ public class SosDialogActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 // Countdown finished, proceed with SOS
-                if (Dashboard.instance != null) {
-                    Dashboard.instance.alertgenrator();
-                }
+                Intent sosIntent = new Intent(SosDialogActivity.this, EmergencyTriggerService.class);
+                sosIntent.setAction(ACTION_SEND_SOS);
+                startService(sosIntent);
                 finish();
             }
         }.start();

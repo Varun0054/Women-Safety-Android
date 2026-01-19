@@ -31,7 +31,7 @@ public class ChatbotActivity extends AppCompatActivity {
 
     private static final String TAG = "ChatbotActivity";
     // IMPORTANT: Replace with your actual API key
-    private final String OPENROUTER_API_KEY = "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";
+    private final String OPENROUTER_API_KEY = "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";
 
     private RecyclerView chatRecyclerView;
     private EditText messageEditText;

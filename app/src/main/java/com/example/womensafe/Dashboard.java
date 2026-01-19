@@ -26,11 +26,12 @@ import android.provider.Settings;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -40,8 +41,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -58,14 +57,12 @@ import java.util.Set;
 
 public class Dashboard extends AppCompatActivity {
 
-    public static Dashboard instance;
     CardView c1, c2, c3, chatbotCard, currentLocationCard;
     DatabaseReference db;
     FirebaseAuth auth;
     String ussd = "";
     String mob = "";
     ImageView imageView;
-    Button button;
 
     private RecyclerView mRecyclerView;
     private ImageAdpter mAdapter;
@@ -79,7 +76,6 @@ public class Dashboard extends AppCompatActivity {
 
     private static final int REQUEST_CODE = 101;
     private static final int REQUEST_SEND_SMS_PERMISSION = 2;
-    private static final int OVERLAY_PERMISSION_REQUEST_CODE = 1234;
 
     // Shake detection
     private SensorManager sensorManager;
@@ -95,13 +91,20 @@ public class Dashboard extends AppCompatActivity {
     PendingIntent sentPI, deliveredPI;
     BroadcastReceiver smsSentReceiver, smsDeliveredReceiver;
 
+    private final ActivityResultLauncher<Intent> overlayPermissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (!Settings.canDrawOverlays(this)) {
+                    Toast.makeText(this, "Overlay permission is required for emergency alerts.", Toast.LENGTH_SHORT).show();
+                }
+            });
+
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
-        instance = this;
         c1 = findViewById(R.id.card1);
         c2 = findViewById(R.id.card2);
         c3 = findViewById(R.id.card3);
@@ -110,7 +113,6 @@ public class Dashboard extends AppCompatActivity {
 
         TextView textView = findViewById(R.id.womenname);
         imageView = findViewById(R.id.imageview1);
-        button = findViewById(R.id.dashboard_logout_button_unique);
 
         img4 = findViewById(R.id.menuimage);
 
@@ -154,14 +156,6 @@ public class Dashboard extends AppCompatActivity {
         currentLocationCard.setOnClickListener(view -> {
             Intent intent = new Intent(Dashboard.this, locationn.class);
             startActivity(intent);
-        });
-
-        button.setOnClickListener(view -> {
-            auth.signOut();
-            Toast.makeText(Dashboard.this, "Signed out successfully", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(Dashboard.this, login.class);
-            startActivity(intent);
-            finish();
         });
 
         imageView.setOnClickListener(v -> {
@@ -289,8 +283,13 @@ public class Dashboard extends AppCompatActivity {
             }
         };
 
-        registerReceiver(smsSentReceiver, new IntentFilter(SENT));
-        registerReceiver(smsDeliveredReceiver, new IntentFilter(DELIVERED));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(smsSentReceiver, new IntentFilter(SENT), Context.RECEIVER_NOT_EXPORTED);
+            registerReceiver(smsDeliveredReceiver, new IntentFilter(DELIVERED), Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(smsSentReceiver, new IntentFilter(SENT));
+            registerReceiver(smsDeliveredReceiver, new IntentFilter(DELIVERED));
+        }
 
         // Fetch latest SOS message every time the activity resumes
         if (ussd != null && !ussd.isEmpty()) {
@@ -374,21 +373,15 @@ public class Dashboard extends AppCompatActivity {
             return;
         }
 
-        fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (location == null) {
-                    Toast.makeText(Dashboard.this, "Enable GPS to send location", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                sendsms(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
+        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location == null) {
+                Toast.makeText(Dashboard.this, "Enable GPS to send location", Toast.LENGTH_SHORT).show();
+                return;
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e(TAG, "Failed to get location: " + e.getMessage());
-                Toast.makeText(Dashboard.this, "Failed to get location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+            sendsms(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Failed to get location: " + e.getMessage());
+            Toast.makeText(Dashboard.this, "Failed to get location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -412,20 +405,6 @@ public class Dashboard extends AppCompatActivity {
                     Toast.makeText(this, "SMS permission denied. SOS message not sent.", Toast.LENGTH_LONG).show();
                 }
                 break;
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == OVERLAY_PERMISSION_REQUEST_CODE) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (Settings.canDrawOverlays(this)) {
-                    // Permission granted
-                } else {
-                    Toast.makeText(this, "Overlay permission is required for emergency alerts.", Toast.LENGTH_SHORT).show();
-                }
-            }
         }
     }
 
@@ -492,12 +471,10 @@ public class Dashboard extends AppCompatActivity {
     }
 
     private void checkOverlayPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, OVERLAY_PERMISSION_REQUEST_CODE);
-            }
+        if (!Settings.canDrawOverlays(this)) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            overlayPermissionLauncher.launch(intent);
         }
     }
 }

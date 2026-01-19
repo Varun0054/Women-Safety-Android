@@ -5,193 +5,261 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F3C6D5"
     tools:context=".completeprofile">
+
+    <ImageView
+        android:id="@+id/background_image"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/loginss"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/loginss"
-            android:orientation="vertical"
-            android:paddingBottom="20dp">
+            android:paddingBottom="32dp">
 
             <TextView
                 android:id="@+id/textView12"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:gravity="center"
+                android:layout_marginTop="32dp"
                 android:text="Complete Profile Here"
                 android:textColor="#000000"
                 android:textSize="24sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/profile_image"
                 android:layout_width="96dp"
                 android:layout_height="96dp"
-                android:layout_gravity="center"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="16dp"
                 android:src="@drawable/womenlogo"
                 app:civ_border_color="#F8F8F8"
-                app:civ_border_width="2dp" />
+                app:civ_border_width="2dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView12" />
 
             <TextView
                 android:id="@+id/textView13"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
+                android:layout_marginTop="8dp"
                 android:text="Tap to select Image"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="@+id/profile_image"
+                app:layout_constraintStart_toStartOf="@+id/profile_image"
+                app:layout_constraintTop_toBottomOf="@+id/profile_image" />
 
             <TextView
                 android:id="@+id/textView14"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="20dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="24dp"
                 android:fontFamily="@font/aclonica"
                 android:text="Name"
                 android:textColor="#000000"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView13" />
 
             <EditText
                 android:id="@+id/wname"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_marginHorizontal="40dp"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/edittextstyle"
-                android:drawableLeft="@drawable/baseline_person_24"
-                android:gravity="center"
+                android:drawableStart="@drawable/baseline_person_24"
+                android:drawablePadding="12dp"
                 android:hint="Person Name..."
                 android:inputType="textPersonName"
-                android:paddingLeft="10dp" />
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                app:layout_constraintEnd_toEndOf="@+id/textView14"
+                app:layout_constraintStart_toStartOf="@+id/textView14"
+                app:layout_constraintTop_toBottomOf="@+id/textView14" />
 
             <TextView
                 android:id="@+id/textView15"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="20dp"
+                android:layout_marginTop="16dp"
                 android:fontFamily="@font/aclonica"
                 android:text="Mobile Number"
                 android:textColor="#000000"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="@+id/wname"
+                app:layout_constraintStart_toStartOf="@+id/wname"
+                app:layout_constraintTop_toBottomOf="@+id/wname" />
 
             <EditText
                 android:id="@+id/wmob"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_marginHorizontal="40dp"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/edittextstyle"
-                android:drawableLeft="@drawable/baseline_phone_android_24"
-                android:gravity="center"
+                android:drawableStart="@drawable/baseline_phone_android_24"
+                android:drawablePadding="12dp"
                 android:hint="0123456789"
                 android:inputType="phone"
-                android:paddingLeft="10dp" />
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                app:layout_constraintEnd_toEndOf="@+id/textView15"
+                app:layout_constraintStart_toStartOf="@+id/textView15"
+                app:layout_constraintTop_toBottomOf="@+id/textView15" />
 
             <TextView
                 android:id="@+id/textView16"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="20dp"
+                android:layout_marginTop="16dp"
                 android:fontFamily="@font/aclonica"
                 android:text="Address"
                 android:textColor="#000000"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="@+id/wmob"
+                app:layout_constraintStart_toStartOf="@+id/wmob"
+                app:layout_constraintTop_toBottomOf="@+id/wmob" />
 
             <EditText
                 android:id="@+id/waddress"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_marginHorizontal="40dp"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/edittextstyle"
-                android:drawableLeft="@drawable/baseline_home_24"
-                android:gravity="center"
+                android:drawableStart="@drawable/baseline_home_24"
+                android:drawablePadding="12dp"
                 android:hint="Dondaicha, Maharashtra, India"
                 android:inputType="textPersonName"
-                android:paddingLeft="10dp" />
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                app:layout_constraintEnd_toEndOf="@+id/textView16"
+                app:layout_constraintStart_toStartOf="@+id/textView16"
+                app:layout_constraintTop_toBottomOf="@+id/textView16" />
 
             <TextView
                 android:id="@+id/textView17"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="20dp"
+                android:layout_marginTop="16dp"
                 android:fontFamily="@font/aclonica"
                 android:text="Select Gender"
                 android:textColor="#000000"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="@+id/waddress"
+                app:layout_constraintStart_toStartOf="@+id/waddress"
+                app:layout_constraintTop_toBottomOf="@+id/waddress" />
 
             <Spinner
                 android:id="@+id/spinner"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_marginHorizontal="40dp"
-                android:background="@drawable/edittextstyle" />
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/edittextstyle"
+                app:layout_constraintEnd_toEndOf="@+id/textView17"
+                app:layout_constraintStart_toStartOf="@+id/textView17"
+                app:layout_constraintTop_toBottomOf="@+id/textView17" />
 
             <TextView
                 android:id="@+id/textView18"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="20dp"
+                android:layout_marginTop="16dp"
                 android:fontFamily="@font/aclonica"
                 android:text="D.O.B."
                 android:textColor="#000000"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="@+id/spinner"
+                app:layout_constraintStart_toStartOf="@+id/spinner"
+                app:layout_constraintTop_toBottomOf="@+id/spinner" />
 
             <EditText
                 android:id="@+id/wdob"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_marginHorizontal="40dp"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/edittextstyle"
-                android:drawableLeft="@drawable/baseline_calendar_month_24"
-                android:gravity="center"
+                android:drawableStart="@drawable/baseline_calendar_month_24"
+                android:drawablePadding="12dp"
                 android:hint="00/00/0000"
                 android:inputType="date"
-                android:paddingLeft="10dp" />
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                app:layout_constraintEnd_toEndOf="@+id/textView18"
+                app:layout_constraintStart_toStartOf="@+id/textView18"
+                app:layout_constraintTop_toBottomOf="@+id/textView18" />
 
             <TextView
                 android:id="@+id/textView19"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="20dp"
+                android:layout_marginTop="16dp"
                 android:fontFamily="@font/aclonica"
                 android:text="Aadhar Number"
                 android:textColor="#000000"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="@+id/wdob"
+                app:layout_constraintStart_toStartOf="@+id/wdob"
+                app:layout_constraintTop_toBottomOf="@+id/wdob" />
 
             <EditText
                 android:id="@+id/wadhar"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_marginHorizontal="40dp"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/edittextstyle"
-                android:drawableLeft="@drawable/baseline_credit_card_24"
-                android:gravity="center"
+                android:drawableStart="@drawable/baseline_credit_card_24"
+                android:drawablePadding="12dp"
                 android:hint="0000-0000-0000"
                 android:inputType="number"
-                android:paddingLeft="10dp" />
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                app:layout_constraintEnd_toEndOf="@+id/textView19"
+                app:layout_constraintStart_toStartOf="@+id/textView19"
+                app:layout_constraintTop_toBottomOf="@+id/textView19" />
 
             <Button
                 android:id="@+id/savebtn"
-                android:layout_width="120dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center"
-                android:layout_marginTop="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:paddingStart="48dp"
+                android:paddingEnd="48dp"
                 android:backgroundTint="#E91E63"
-                android:text="Save" />
+                android:text="Save"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/wadhar" />
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
